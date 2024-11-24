@@ -60,4 +60,4 @@ async function fetchAndSaveData(
   });
 }
 
-fetchAndSaveData(39, "bangalore", 40, 47, "allLiverCareMeds");
+fetchAndSaveData(34, "bangalore", 40, 235, "allBoneJointMuscleCareMeds");
