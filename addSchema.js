@@ -1,5 +1,5 @@
-const fs = require("fs");
 const path = require("path");
+const fs = require("fs");
 const fetch = require("node-fetch");
 const { JSDOM } = require("jsdom");
 
@@ -7,8 +7,9 @@ async function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function enrichJsonFileWithMetaData(fileName) {
+async function enrichJsonFileWithMetaData(fileName, start = 0, end = null) {
   const filePath = path.join(__dirname, "data", fileName);
+  const logFilePath = path.join(__dirname, "data", `${fileName}.log`);
 
   if (!fs.existsSync(filePath)) {
     console.error(`File not found: ${filePath}`);
@@ -30,16 +31,41 @@ async function enrichJsonFileWithMetaData(fileName) {
     return;
   }
 
-  for (const obj of data) {
+  // Clear previous log file
+  fs.writeFileSync(logFilePath, "");
+
+  // Adjust the end parameter to the array length if not provided
+  end = end !== null ? end : data.length;
+
+  if (start >= end) {
+    console.error("Invalid range: 'start' must be less than 'end'.");
+    return;
+  }
+
+  for (let i = start; i < end; i++) {
+    const obj = data[i];
+
     if (!obj.url) {
-      console.error("Missing URL field in object:", obj);
+      const logMessage = `Index ${i}: Missing URL field in object: ${JSON.stringify(
+        obj
+      )}\n`;
+      console.error(logMessage.trim());
+      fs.appendFileSync(logFilePath, logMessage);
       continue;
     }
 
     try {
       const response = await fetch(obj.url);
-      const html = await response.text();
 
+      if (!response.ok) {
+        const logMessage = `Index ${i}: \nFailed to fetch URL: ${obj.url}, \nStatus: ${response.status}, \nMessage: ${response.statusText}\n\n\n`;
+        console.error(logMessage.trim());
+        fs.appendFileSync(logFilePath, logMessage);
+        obj.metaData = {}; // Add an empty metaData object
+        continue;
+      }
+
+      const html = await response.text();
       const dom = new JSDOM(html);
       const scriptTag = dom.window.document.querySelector(
         'script[type="application/ld+json"]'
@@ -48,13 +74,17 @@ async function enrichJsonFileWithMetaData(fileName) {
       if (scriptTag) {
         const metaData = JSON.parse(scriptTag.textContent);
         obj.metaData = metaData;
-        console.log(`Found metadata for URL: ${obj.url}`);
+        console.log(`Index ${i}: Found metadata for URL: ${obj.url}`);
       } else {
-        console.error(`Not found: Metadata for URL: ${obj.url}`);
+        const logMessage = `Index ${i}: No metadata found for URL: ${obj.url}\n`;
+        console.error(logMessage.trim());
+        fs.appendFileSync(logFilePath, logMessage);
         obj.metaData = {}; // Add an empty metaData object
       }
     } catch (err) {
-      console.error(`Error fetching URL ${obj.url}: ${err.message}`);
+      const logMessage = `Index ${i}: Error processing URL: ${obj.url}, Error: ${err.message}\n`;
+      console.error(logMessage.trim());
+      fs.appendFileSync(logFilePath, logMessage);
       obj.metaData = {}; // Add an empty metaData object in case of error
     }
 
@@ -71,5 +101,5 @@ async function enrichJsonFileWithMetaData(fileName) {
   }
 }
 
-// Example usage:
-enrichJsonFileWithMetaData("allBoneJointMuscleCareMeds.json");
+// Usage example with optional start and end parameters
+enrichJsonFileWithMetaData("allBoneJointMuscleCareMeds.json", 10, 11);
