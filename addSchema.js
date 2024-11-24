@@ -3,6 +3,10 @@ const path = require("path");
 const fetch = require("node-fetch");
 const { JSDOM } = require("jsdom");
 
+async function delay(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 async function enrichJsonFileWithMetaData(fileName) {
   const filePath = path.join(__dirname, "data", fileName);
 
@@ -47,10 +51,15 @@ async function enrichJsonFileWithMetaData(fileName) {
         console.log(`Found metadata for URL: ${obj.url}`);
       } else {
         console.error(`Not found: Metadata for URL: ${obj.url}`);
+        obj.metaData = {}; // Add an empty metaData object
       }
     } catch (err) {
       console.error(`Error fetching URL ${obj.url}: ${err.message}`);
+      obj.metaData = {}; // Add an empty metaData object in case of error
     }
+
+    // Introduce a 1-second delay between requests
+    await delay(1000);
   }
 
   // Write the updated content back to the file
