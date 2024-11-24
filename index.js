@@ -60,4 +60,4 @@ async function fetchAndSaveData(
   });
 }
 
-fetchAndSaveData(40, "bangalore", 40, 84, "allKidneyCareMeds");
+fetchAndSaveData(1183, "bangalore", 40, 33, "allDermaCareMeds");
