@@ -2,13 +2,18 @@ const fetch = require("node-fetch");
 const fs = require("fs");
 const path = require("path");
 
-async function fetchAndSaveData() {
-  const baseUrl =
-    "https://www.1mg.com/pharmacy_api_gateway/v8/category/1/paginated";
-  const city = "bangalore";
+async function fetchAndSaveData(
+  categoryId,
+  currCity,
+  itemsPerPage,
+  maxPages,
+  fileName
+) {
+  const baseUrl = `https://www.1mg.com/pharmacy_api_gateway/v8/category/${categoryId}/paginated`;
+  const city = currCity;
   const filter = true;
-  const perPage = 40;
-  const totalPages = 107;
+  const perPage = parseInt(itemsPerPage);
+  const totalPages = parseInt(maxPages);
 
   // Ensure the 'data' folder exists
   const dataDir = path.join(__dirname, "data");
@@ -45,7 +50,7 @@ async function fetchAndSaveData() {
   }
 
   // Write the collected data to a single JSON file
-  const filePath = path.join(dataDir, "allDiabetesMedsData.json");
+  const filePath = path.join(dataDir, `${fileName}.json`);
   fs.writeFile(filePath, JSON.stringify(allData, null, 2), (err) => {
     if (err) {
       console.error("Error writing data to file:", err.message);
@@ -55,4 +60,4 @@ async function fetchAndSaveData() {
   });
 }
 
-fetchAndSaveData();
+fetchAndSaveData(35, "bangalore", 40, 73, "allHeartCareMeds");
