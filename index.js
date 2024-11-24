@@ -60,4 +60,4 @@ async function fetchAndSaveData(
   });
 }
 
-fetchAndSaveData(14, "bangalore", 40, 217, "allRespiratoryCareMeds");
+fetchAndSaveData(31, "bangalore", 40, 76, "allEyeCareMeds");
