@@ -45,7 +45,7 @@ async function fetchAndSaveData() {
   }
 
   // Write the collected data to a single JSON file
-  const filePath = path.join(dataDir, "allPharmacyData.json");
+  const filePath = path.join(dataDir, "allDiabetesMedsData.json");
   fs.writeFile(filePath, JSON.stringify(allData, null, 2), (err) => {
     if (err) {
       console.error("Error writing data to file:", err.message);
