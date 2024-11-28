@@ -51,6 +51,8 @@ async function enrichJsonFileWithMetaData(fileName, start = 0, end = null) {
       )}\n`;
       console.error(logMessage.trim());
       fs.appendFileSync(logFilePath, logMessage);
+      obj.metaData = {}; // Add an empty metaData object
+      fs.writeFileSync(filePath, JSON.stringify(data, null, 2)); // Save progress
       continue;
     }
 
@@ -62,6 +64,7 @@ async function enrichJsonFileWithMetaData(fileName, start = 0, end = null) {
         console.error(logMessage.trim());
         fs.appendFileSync(logFilePath, logMessage);
         obj.metaData = {}; // Add an empty metaData object
+        fs.writeFileSync(filePath, JSON.stringify(data, null, 2)); // Save progress
         continue;
       }
 
@@ -88,17 +91,14 @@ async function enrichJsonFileWithMetaData(fileName, start = 0, end = null) {
       obj.metaData = {}; // Add an empty metaData object in case of error
     }
 
+    // Save progress after processing each object
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
+
     // Introduce a 1-second delay between requests
     await delay(1200);
   }
 
-  // Write the updated content back to the file
-  try {
-    fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
-    console.log("File updated successfully.");
-  } catch (err) {
-    console.error(`Error writing to file: ${err.message}`);
-  }
+  console.log("File processing completed.");
 }
 
 // Usage example with optional start and end parameters
