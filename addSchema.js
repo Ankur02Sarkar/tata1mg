@@ -89,7 +89,7 @@ async function enrichJsonFileWithMetaData(fileName, start = 0, end = null) {
     }
 
     // Introduce a 1-second delay between requests
-    await delay(1000);
+    await delay(1200);
   }
 
   // Write the updated content back to the file
@@ -102,4 +102,4 @@ async function enrichJsonFileWithMetaData(fileName, start = 0, end = null) {
 }
 
 // Usage example with optional start and end parameters
-enrichJsonFileWithMetaData("allBoneJointMuscleCareMeds.json", 10, 11);
+enrichJsonFileWithMetaData("allDiabetesMedsData.json");
