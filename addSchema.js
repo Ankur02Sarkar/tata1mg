@@ -44,6 +44,24 @@ async function enrichJsonFileWithMetaData(fileName, start = 0, end = null) {
 
   for (let i = start; i < end; i++) {
     const obj = data[i];
+    if (obj.metaData) {
+      // Check if metaData is an object
+      if (Array.isArray(obj.metaData)) {
+        // Loop through the array to check each item
+        const hasContext = obj.metaData.some(item => item["@type"]);
+        if (hasContext) {
+          console.log("Data Already Present in Array");
+          continue; // Skip this iteration
+        }
+      } else if (typeof obj.metaData === "object") {
+        // Check if @context exists in the object
+        if (obj.metaData["@context"]) {
+          console.log("Data Already Present in Object");
+          continue; // Skip this iteration
+        }
+      }
+    }
+
 
     if (!obj.url) {
       const logMessage = `Index ${i}: Missing URL field in object: ${JSON.stringify(
