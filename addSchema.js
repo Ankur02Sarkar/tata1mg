@@ -7,7 +7,16 @@ async function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function enrichJsonFileWithMetaData(fileName, start = 0, end = null) {
+async function fetchWithTimeout(url, timeout = 7000) {
+  return Promise.race([
+    fetch(url),
+    new Promise((_, reject) =>
+      setTimeout(() => reject(new Error("Timeout exceeded")), timeout)
+    ),
+  ]);
+}
+
+async function enrichJsonFileWithMetaData(fileName, start = 10098, end = null) {
   const filePath = path.join(__dirname, "data", fileName);
   const logFilePath = path.join(__dirname, "data", `${fileName}.log`);
 
@@ -75,7 +84,7 @@ async function enrichJsonFileWithMetaData(fileName, start = 0, end = null) {
     }
 
     try {
-      const response = await fetch(obj.url);
+      const response = await fetchWithTimeout(obj.url);
 
       if (!response.ok) {
         const logMessage = `Index ${i}: \nFailed to fetch URL: ${obj.url}, \nStatus: ${response.status}, \nMessage: ${response.statusText}\n\n\n`;
@@ -95,15 +104,15 @@ async function enrichJsonFileWithMetaData(fileName, start = 0, end = null) {
       if (scriptTag) {
         const metaData = JSON.parse(scriptTag.textContent);
         obj.metaData = metaData;
-        console.log(`Index ${i}: Found metadata for URL: ${obj.url}`);
+        console.log(`Index ${i}/${end}: Found metadata for URL: ${obj.url}`);
       } else {
-        const logMessage = `Index ${i}: No metadata found for URL: ${obj.url}\n`;
+        const logMessage = `Index ${i}/${end}: No metadata found for URL: ${obj.url}\n`;
         console.error(logMessage.trim());
         fs.appendFileSync(logFilePath, logMessage);
         obj.metaData = {}; // Add an empty metaData object
       }
     } catch (err) {
-      const logMessage = `Index ${i}: Error processing URL: ${obj.url}, Error: ${err.message}\n`;
+      const logMessage = `Index ${i}/${end}: Error processing URL: ${obj.url}, Error: ${err.message}\n`;
       console.error(logMessage.trim());
       fs.appendFileSync(logFilePath, logMessage);
       obj.metaData = {}; // Add an empty metaData object in case of error
@@ -120,4 +129,4 @@ async function enrichJsonFileWithMetaData(fileName, start = 0, end = null) {
 }
 
 // Usage example with optional start and end parameters
-enrichJsonFileWithMetaData("allDiabetesMedsData.json");
+enrichJsonFileWithMetaData("allStomachCareMeds.json");
